@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import Cookies from "js-cookie";
 const commonConfig = {
     headers: {
         "Content-Type": "application/json",
@@ -8,8 +8,24 @@ const commonConfig = {
 };
 
 export default (baseURL) => {
-    return axios.create({
+
+    const axiosInstance = axios.create({
         baseURL,
         ...commonConfig,
     });
+
+    axiosInstance.interceptors.request.use(
+        config => {
+            const token = Cookies.get('token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            return config;
+        },
+        error => {
+            return Promise.reject(error);
+        }
+    );
+    return axiosInstance
 };
+
